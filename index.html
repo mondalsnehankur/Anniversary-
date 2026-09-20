@@ -98,6 +98,12 @@ section{padding:80px 20px; max-width:900px; margin:0 auto; position:relative;}
 #scoreBadge.bump .sb-num{animation:sbBump .35s ease;}
 @keyframes sbBump{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
 
+/* ---------- SCROLL PROGRESS BAR ---------- */
+#scrollBar{position:fixed; top:0; left:0; height:4px; width:0%; background:linear-gradient(90deg,var(--gold),var(--hotpink)); z-index:1000; transition:width .1s linear;}
+
+/* ---------- BOTTOM NOTE ---------- */
+.scroll-note{text-align:center; font-family:var(--script-font); font-size:1.3rem; color:var(--rose); padding:10px 20px 0;}
+
 /* ---------- HERO ---------- */
 #hero{
   min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -516,6 +522,7 @@ h2.heading .script{font-size:1.35em; text-transform:none; letter-spacing:0; font
 </style>
 </head>
 <body>
+<div id="scrollBar"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="ic-star" viewBox="0 0 24 24"><path d="M12 2.4l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.1l-5.9 3.4 1.3-6.6-4.9-4.6 6.6-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
@@ -923,6 +930,8 @@ Forever yours,</div>
   <div class="save-hint">📸 this page is just for you — screenshot or save it if you want to keep it forever</div>
 </section>
 
+<p class="scroll-note reveal">you've just scrolled through a whole year of us 🌻</p>
+
 <section id="footer" class="reveal">
   <div class="heart">🌻🤍🌻</div>
   <div>Happy Anniversary,<span class="script"> Maitreyee</span></div>
@@ -941,7 +950,14 @@ function toggleMusic(forceOn){
   const shouldPlay = forceOn!==undefined ? forceOn : bgm.paused;
   const plPlayBtn=document.getElementById('plPlay');
   if(shouldPlay){
+    bgm.volume=0;
     bgm.play().catch(()=>{});
+    let vol=0;
+    const fade=setInterval(()=>{
+      vol+=0.05;
+      if(vol>=1){ vol=1; clearInterval(fade); }
+      bgm.volume=vol;
+    },80);
     musicToggle.textContent='🔊';
     musicToggle.classList.add('playing');
     document.getElementById('songCard').classList.add('playing');
@@ -1113,16 +1129,39 @@ document.querySelectorAll('.flip-card').forEach(card=>{
   modal.addEventListener('click',(e)=>{ if(e.target===modal) modal.classList.remove('show'); });
 })();
 
-// envelope open -> reveal letter
+// envelope open -> reveal letter + petal burst
 const envelopeBtn=document.getElementById('envelopeBtn');
 if(envelopeBtn){
   envelopeBtn.addEventListener('click',()=>{
     envelopeBtn.classList.add('opened');
+    const rect=envelopeBtn.getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const bits=['🌻','🌼','💛','✨'];
+    for(let i=0;i<22;i++){
+      const h=document.createElement('div');
+      h.className='burst-heart';
+      h.textContent=bits[Math.floor(Math.random()*bits.length)];
+      h.style.left=(cx + (Math.random()*220-110))+'px';
+      h.style.top=(cy + (Math.random()*40-20))+'px';
+      h.style.fontSize=(16+Math.random()*14)+'px';
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(),1600);
+    }
     setTimeout(()=>{
       document.getElementById('envelopeWrap').classList.add('hidden');
       document.getElementById('letterPaper').classList.remove('hidden');
       document.getElementById('letterSign').classList.remove('hidden');
     },550);
+  });
+}
+
+// scroll progress bar
+const scrollBar=document.getElementById('scrollBar');
+if(scrollBar){
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement;
+    const scrolled=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    scrollBar.style.width=scrolled+'%';
   });
 }
 
